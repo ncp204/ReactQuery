@@ -1,3 +1,4 @@
+import axios, { AxiosError } from "axios";
 import { useSearchParams } from "react-router-dom"
 
 export const useQueryString = () => {
@@ -8,4 +9,8 @@ export const useQueryString = () => {
     // Sau đó, Object.fromEntries() được sử dụng để chuyển đổi mảng này thành đối tượng.
     return searchParamObject;
     // Cuối cùng, hook trả về đối tượng JavaScript chứa các tham số truy vấn từ URL.
+}
+
+export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
+    return axios.isAxiosError(error);
 }
