@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { deleteStudent, getStudents } from 'apis/student.api'
+import { deleteStudent, getStudent, getStudents } from 'apis/student.api'
 import { Link } from 'react-router-dom'
 import { useQueryString } from 'utils/utils';
 import classNames from 'classnames'
@@ -23,11 +23,21 @@ export default function Students() {
 
   const deleteStudentMutation = useMutation({
     mutationFn: (id: number | string) => deleteStudent(id),
+    onSuccess: (_) => {
+      queryClient.invalidateQueries({ queryKey: ['students', page], exact: true })
+    }
   })
 
   const handleDeleteStudent = (id: number) => {
     deleteStudentMutation.mutate(id);
     console.log('Xoa thanh cong student voi id: ', id);
+  }
+
+  const handlePreFetchStudent = (id: number) => {
+    queryClient.prefetchQuery(['student', String(id)], {
+      queryFn: () => getStudent(id),
+      staleTime: 1000 * 10
+    })
   }
 
   return (
@@ -82,7 +92,9 @@ export default function Students() {
                       return (
                         <tr
                           key={student.id}
-                          className='border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600'>
+                          className='border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600'
+                          onMouseEnter={() => handlePreFetchStudent(student.id)}
+                        >
                           <td className='py-4 px-6'>{student.id}</td>
                           <td className='py-4 px-6'>
                             <img
