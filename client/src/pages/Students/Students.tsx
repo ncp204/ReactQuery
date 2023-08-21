@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { getStudents } from 'apis/student.api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { deleteStudent, getStudents } from 'apis/student.api'
 import { Link } from 'react-router-dom'
 import { useQueryString } from 'utils/utils';
 import classNames from 'classnames'
@@ -18,6 +18,17 @@ export default function Students() {
 
   const totalStudentCount = Number(studentsQuery.data?.headers['x-total-count']) || 0;
   const totalPage = Math.ceil(totalStudentCount / LIMIT)
+
+  const queryClient = useQueryClient();
+
+  const deleteStudentMutation = useMutation({
+    mutationFn: (id: number | string) => deleteStudent(id),
+  })
+
+  const handleDeleteStudent = (id: number) => {
+    deleteStudentMutation.mutate(id);
+    console.log('Xoa thanh cong student voi id: ', id);
+  }
 
   return (
     <div>
@@ -85,12 +96,13 @@ export default function Students() {
                           </th>
                           <td className='py-4 px-6'>{student.email}</td>
                           <td className='py-4 px-6 text-right'>
-                            <Link to={`students/${student.id}`}
+                            <Link to={`/students/${student.id}`}
                               className='mr-5 font-medium text-blue-600 hover:underline dark:text-blue-500'>
-                              Edit
+                              Update
                             </Link>
                             <button
                               className='font-medium text-red-600 dark:text-red-500'
+                              onClick={() => handleDeleteStudent(student.id)}
                             >Delete</button>
                           </td>
                         </tr>
