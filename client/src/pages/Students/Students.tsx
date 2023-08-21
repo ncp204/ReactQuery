@@ -12,8 +12,15 @@ export default function Students() {
 
   const studentsQuery = useQuery({
     queryKey: ['students', page],
-    queryFn: () => getStudents(page, LIMIT),
-    keepPreviousData: true
+    queryFn: () => {
+      const controller = new AbortController();
+      setTimeout(() => {
+        controller.abort();
+      }, 3000)
+      return getStudents(page, LIMIT);
+    },
+    keepPreviousData: true,
+    retry: 0
   })
 
   const totalStudentCount = Number(studentsQuery.data?.headers['x-total-count']) || 0;
@@ -40,8 +47,30 @@ export default function Students() {
     })
   }
 
+  const refetchStudents = () => {
+    studentsQuery.refetch();
+  }
+
+  const cancelRequestStudents = () => {
+    queryClient.cancelQueries({
+      queryKey: ['students', page]
+    })
+  }
+
   return (
     <div>
+      <button
+        className='mt-6 rounded bg-pink-700 px-5 py-2 text-white'
+        onClick={refetchStudents}
+      >
+        Refetch api
+      </button>
+      <button
+        className='mt-6 rounded bg-orange-700 px-5 py-2 text-white'
+        onClick={cancelRequestStudents}
+      >
+        Cancel refetch api
+      </button>
       <Link to={'/students/add'} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
         Add Student
       </Link>
